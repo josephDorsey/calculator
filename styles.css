@@ -36,6 +36,7 @@ button:active {
 .number,
 .total {
   display: block;
+  flex: 1;
 }
 .total {
   font-size: 3rem;
