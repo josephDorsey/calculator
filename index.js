@@ -56,7 +56,11 @@ const calculator = {
 
 function addOperator(num, arr) {
   arr.push(num);
-  return arr.reduce((acc, cur) => acc + cur);
+  return arr.reduce((acc, cur) => acc + cur, 0);
+}
+function subtractOperator(num, arr) {
+  arr.push(num);
+  return arr.reduce((acc, cur) => acc - cur);
 }
 bottomButtons.addEventListener("click", (e) => {
   if (
@@ -75,7 +79,7 @@ bottomButtons.addEventListener("click", (e) => {
       equation.textContent = "";
       calculator.state = "typing";
     }
-    if (equation.textContent.includes("+") && calculator.state === "add") {
+    if (equation.textContent.includes("-") && calculator.state === "subtract") {
       total.value = "";
       calculator.state = "typing";
     }
@@ -92,10 +96,25 @@ bottomButtons.addEventListener("click", (e) => {
     }
     equation.textContent = `${total.value}+`;
   }
+  if (e.target.value === "-") {
+    calculator.state = "subtract";
+    if (equation.textContent.includes("-")) {
+      total.value = subtractOperator(+total.value, calculator.sumAll);
+    } else {
+      calculator.sumAll.push(+total.value);
+    }
+    equation.textContent = `${total.value}-`;
+  }
   if (e.target.value === "=") {
-    calculator.state = "end";
     equation.textContent += `${total.value}=`;
-    total.value = addOperator(+total.value, calculator.sumAll);
+    if (equation.textContent.includes("+")) {
+      total.value = addOperator(+total.value, calculator.sumAll);
+    }
+    if (equation.textContent.includes("-")) {
+      total.value = subtractOperator(+total.value, calculator.sumAll);
+    }
+
+    calculator.state = "end";
     calculator.sumAll.length = 0;
   }
 });
