@@ -1,67 +1,42 @@
 // Functions
-const add = function (a, b) {
-  return a + b;
-};
-
-const subtract = function (a, b) {
-  return a - b;
-};
-
-const sum = function (arr) {
-  let sum = arr.reduce((acc, cur) => acc + cur, 0);
-  return sum;
-};
-
-const multiply = function (...args) {
-  let sum = args.reduce((acc, cur) => acc * cur, 1);
-  return sum;
-};
-
-const power = function (a, b) {
-  return a ** b;
-};
-
-const factorial = function (num) {
-  let sum = 1;
-  for (let i = 1; i <= num; i++) {
-    sum *= i;
-  }
-  return sum;
-};
-
 const clear = document.querySelector(".clear");
 const total = document.querySelector(".total");
 const equation = document.querySelector(".equation");
 const bottomButtons = document.querySelector(".bottom-buttons");
 const topButtons = document.querySelector(".top-buttons");
 // const state = ["typing", "add", "divide", "multiply", "equals", "subtracts"];
-const operators = ["+", "-", "x", "/", "="];
-const numberEntry = [];
-let mode = null;
+let state = "typing";
+let previousValue;
 topButtons.addEventListener("click", (e) => {
   if (e.target.name === "clear") {
+    previousValue = "";
     total.value = "";
     equation.textContent = "";
     state = "typing";
   }
 });
 
-const calculator = {
-  state: "typing",
-  total: "",
-  equation: "",
-  sumAll: [],
-  operators: ["+", "-", "x", "/", "="],
-};
+function operate(operator, num1, num2) {
+  if (operator === "+") {
+    return +num1 + +num2;
+  }
+  if (operator === "-") {
+    return +num1 - +num2;
+  }
+  if (operator === "x") {
+    return +num1 * +num2;
+  }
+  if (operator === "/") {
+    let checkValue = +num1 / +num2;
+    console.log(checkValue);
+    if (!Number.isInteger(checkValue)) {
+      return +checkValue.toFixed(3).toString();
+    } else {
+      return checkValue;
+    }
+  }
+}
 
-function addOperator(num, arr) {
-  arr.push(num);
-  return arr.reduce((acc, cur) => acc + cur, 0);
-}
-function subtractOperator(num, arr) {
-  arr.push(num);
-  return arr.reduce((acc, cur) => acc - cur);
-}
 bottomButtons.addEventListener("click", (e) => {
   if (
     e.target.value !== "+" &&
@@ -70,51 +45,121 @@ bottomButtons.addEventListener("click", (e) => {
     e.target.value !== "-" &&
     e.target.value !== "="
   ) {
-    if (equation.textContent.includes("+") && calculator.state === "add") {
+    if (equation.textContent.includes("+") && state === "add") {
+      previousValue = total.value;
       total.value = "";
-      calculator.state = "typing";
+      state = "typing";
     }
-    if (equation.textContent.includes("+") && calculator.state === "end") {
+    if (equation.textContent.includes("+") && state === "end") {
       total.value = "";
       equation.textContent = "";
-      calculator.state = "typing";
+      state = "typing";
     }
-    if (equation.textContent.includes("-") && calculator.state === "subtract") {
+    if (equation.textContent.includes("-") && state === "subtract") {
+      previousValue = total.value;
       total.value = "";
-      calculator.state = "typing";
+      state = "typing";
     }
-    if (calculator.state === "typing") {
-      calculator.total = total.value += e.target.value;
+    if (equation.textContent.includes("x") && state === "multiply") {
+      previousValue = total.value;
+      total.value = "";
+      state = "typing";
+    }
+    if (equation.textContent.includes("/") && state === "divide") {
+      previousValue = total.value;
+      total.value = "";
+      state = "typing";
+    }
+    if (state === "typing") {
+      total.value += e.target.value;
     }
   }
   if (e.target.value === "+") {
-    calculator.state = "add";
+    state = "add";
+
     if (equation.textContent.includes("+")) {
-      total.value = addOperator(+total.value, calculator.sumAll);
-    } else {
-      calculator.sumAll.push(+total.value);
+      total.value = operate("+", previousValue, +total.value);
+    } else if (equation.textContent.includes("-")) {
+      total.value = operate("-", previousValue, +total.value);
+    } else if (equation.textContent.includes("x")) {
+      total.value = operate("x", previousValue, +total.value);
+    } else if (equation.textContent.includes("/")) {
+      total.value = operate("/", previousValue, +total.value);
     }
     equation.textContent = `${total.value}+`;
+    // Testing to see if still needed
+    // else {
+    //   sumAll.push(+total.value);
+    // }
   }
   if (e.target.value === "-") {
-    calculator.state = "subtract";
+    state = "subtract";
     if (equation.textContent.includes("-")) {
-      total.value = subtractOperator(+total.value, calculator.sumAll);
-    } else {
-      calculator.sumAll.push(+total.value);
+      total.value = operate("-", previousValue, +total.value);
     }
+    if (equation.textContent.includes("+")) {
+      total.value = operate("+", previousValue, +total.value);
+    }
+    if (equation.textContent.includes("x")) {
+      total.value = operate("x", previousValue, +total.value);
+    }
+    if (equation.textContent.includes("/")) {
+      total.value = operate("/", previousValue, +total.value);
+    }
+    // Testing to see if still needed
+    // else {
+    //   sumAll.push(+total.value);
+    // }
     equation.textContent = `${total.value}-`;
+  }
+  if (e.target.value === "x") {
+    state = "multiply";
+    if (equation.textContent.includes("+")) {
+      total.value = operate("+", previousValue, +total.value);
+    } else if (equation.textContent.includes("-")) {
+      total.value = operate("-", previousValue, +total.value);
+    } else if (equation.textContent.includes("x")) {
+      total.value = operate("x", previousValue, +total.value);
+    } else if (equation.textContent.includes("/")) {
+      total.value = operate("/", previousValue, +total.value);
+    }
+    equation.textContent = `${total.value}x`;
+    // Testing to see if still needed
+    // else {
+    //   sumAll.push(+total.value);
+    // }
+  }
+  if (e.target.value === "/") {
+    state = "divide";
+    if (equation.textContent.includes("+")) {
+      total.value = operate("+", previousValue, +total.value);
+    } else if (equation.textContent.includes("-")) {
+      total.value = operate("-", previousValue, +total.value);
+    } else if (equation.textContent.includes("x")) {
+      total.value = operate("x", previousValue, +total.value);
+    } else if (equation.textContent.includes("/")) {
+      total.value = operate("/", previousValue, +total.value);
+    }
+    equation.textContent = `${total.value}/`;
+    // Testing to see if still needed
+    // else {
+    //   sumAll.push(+total.value);
+    // }
   }
   if (e.target.value === "=") {
     equation.textContent += `${total.value}=`;
     if (equation.textContent.includes("+")) {
-      total.value = addOperator(+total.value, calculator.sumAll);
+      total.value = operate("+", previousValue, +total.value);
     }
     if (equation.textContent.includes("-")) {
-      total.value = subtractOperator(+total.value, calculator.sumAll);
+      total.value = operate("-", previousValue, +total.value);
     }
-
-    calculator.state = "end";
-    calculator.sumAll.length = 0;
+    if (equation.textContent.includes("x")) {
+      total.value = operate("x", previousValue, +total.value);
+    }
+    if (equation.textContent.includes("/")) {
+      total.value = operate("/", previousValue, +total.value);
+    }
+    state = "end";
   }
 });
